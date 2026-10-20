@@ -1,0 +1,341 @@
+* { box-sizing: border-box; }
+body { margin: 0; background: #f4f7fb; color: #1f2937; font-family: Arial, Helvetica, sans-serif; }
+button, input, select { font: inherit; }
+.dashboard { max-width: 1450px; margin: 0 auto; padding: 28px; }
+h1 { margin: 0; padding-bottom: 14px; border-bottom: 2px solid #333; font-size: 28px; }
+.intro { color: #64748b; margin: 12px 0 24px; }
+.message { margin-bottom: 18px; padding: 12px 14px; border-radius: 8px; background: #fff5d6; color: #785b00; border: 1px solid #f2dfa2; }
+.control-panel { display: flex; gap: 12px; align-items: flex-end; margin-bottom: 22px; padding: 18px; background: white; border: 1px solid #e1e7ef; border-radius: 12px; flex-wrap: wrap; }
+.field { display: flex; flex-direction: column; gap: 7px; }
+.roster-field { flex: 1; min-width: 220px; }
+.field label { font-size: 13px; font-weight: 700; }
+.field input, .field select { padding: 10px; border: 1px solid #cbd5e1; border-radius: 7px; background: white; }
+.year-field input { width: 100px; }
+.primary-button { padding: 10px 16px; border: 0; border-radius: 7px; background: #218838; color: white; font-weight: 700; cursor: pointer; }
+.primary-button:disabled { opacity: .6; cursor: wait; }
+.summary-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-bottom: 20px; }
+.summary-card { background: white; border: 1px solid #e1e7ef; border-radius: 10px; padding: 16px 18px; display: flex; flex-direction: column; gap: 8px; }
+.summary-card span { color: #64748b; font-size: 13px; }
+.summary-card strong { font-size: 24px; }
+.grid-container { overflow: auto; border: 1px solid #d7dde5; border-radius: 8px; background: white; }
+table { width: 100%; border-collapse: separate; border-spacing: 0; text-align: left; white-space: nowrap; font-size: 13px; }
+th { background: #f4f4f4; font-weight: 700; border-bottom: 2px solid #ccc; }
+th, td { padding: 7px 6px; text-align: center; border-bottom: 1px solid #eee; }
+.name-heading { min-width: 150px; padding: 12px; text-align: left; position: sticky; left: 0; z-index: 2; }
+.student-name { min-width: 150px; padding: 12px; font-weight: 700; text-align: left; background: white; position: sticky; left: 0; z-index: 1; }
+.day-heading { min-width: 35px; }
+.cell { padding: 4px; }
+.attendance-button { min-width: 28px; height: 28px; padding: 0 4px; border-radius: 4px; border: 1px solid #ccc; cursor: pointer; font-weight: 700; font-size: 12px; }
+.attendance-button.present { background: #d4edda; color: #155724; }
+.attendance-button.partial { background: #fff3cd; color: #856404; border-color: #ffeeba; }
+.attendance-button.absent { background: #f8d7da; color: #721c24; }
+.attendance-button:disabled { opacity: 0.7; cursor: not-allowed; }
+.attendance-button.excluded { border-style: dashed; }
+.attended { padding: 12px; font-weight: 700; }
+.percentage { padding: 5px 8px; border-radius: 16px; font-weight: 700; }
+.percentage.low { background: #fff0f0; color: #d9534f; }
+.percentage.good { background: #e5f7eb; color: #218838; }
+.delete-button { border: 1px solid #e5b7bd; background: white; color: #b42332; border-radius: 6px; padding: 6px 8px; cursor: pointer; }
+.empty-state { padding: 36px 16px; text-align: center; border: 1px dashed #cbd5e1; border-radius: 10px; color: #64748b; background: white; }
+.note { margin-top: 14px; color: #64748b; font-size: 12px; }
+@media (max-width: 700px) { .dashboard { padding: 15px; } .control-panel { align-items: stretch; flex-direction: column; } .year-field input { width: 100%; } .summary-row { gap: 8px; } .summary-card { padding: 12px; } .summary-card strong { font-size: 19px; } }
+.sunday-heading {
+  background: #f1f1f1;
+  color: #777;
+}
+
+.sunday-heading small {
+  display: block;
+  font-size: 10px;
+  font-weight: normal;
+}
+
+.sunday-cell {
+  background: #f7f7f7;
+}
+
+.sunday-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sunday-option label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.error-message {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.error-message button {
+  cursor: pointer;
+}
+
+.hours-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.hours-option label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.hours-select-field {
+  min-width: 100px;
+}
+
+.hours-select-field label {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.hint-banner {
+  margin-bottom: 18px;
+  padding: 12px 16px;
+  background: #e8f4fd;
+  border: 1px solid #b8daff;
+  color: #004085;
+  border-radius: 8px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+/* Modal styles for custom hours */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(2px);
+}
+
+.modal-card {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  width: 90%;
+  max-width: 420px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 18px;
+  color: #1f2937;
+}
+
+.modal-header p {
+  margin: 4px 0 0;
+  color: #64748b;
+  font-size: 13px;
+}
+
+.modal-input-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.modal-input-row input {
+  padding: 8px;
+  font-size: 18px;
+  font-weight: 700;
+  width: 100px;
+  text-align: center;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+}
+
+.modal-quick-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.preset-chip {
+  padding: 6px 12px;
+  border-radius: 16px;
+  border: 1px solid #cbd5e1;
+  background: #f8fafc;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  color: #334155;
+}
+
+.preset-chip:hover {
+  background: #e2e8f0;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.btn-secondary {
+  padding: 8px 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  background: white;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.btn-primary {
+  padding: 8px 16px;
+  border: 0;
+  border-radius: 6px;
+  background: #218838;
+  color: white;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* View Mode Tabs */
+.view-mode-tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.view-tab {
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 700;
+  border: 1px solid #cbd5e1;
+  background: white;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #475569;
+  transition: all 0.2s ease;
+}
+
+.view-tab.active {
+  background: #1e293b;
+  color: white;
+  border-color: #1e293b;
+}
+
+.view-tab:hover:not(.active) {
+  background: #f1f5f9;
+}
+
+/* Daily Period Register styles */
+.daily-register-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.daily-control-bar {
+  display: flex;
+  gap: 16px;
+  align-items: flex-end;
+  background: white;
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid #e1e7ef;
+  flex-wrap: wrap;
+}
+
+.daily-actions {
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+}
+
+.action-outline-btn {
+  padding: 9px 14px;
+  border: 1px solid #cbd5e1;
+  background: white;
+  border-radius: 7px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.action-outline-btn:hover {
+  background: #f8fafc;
+}
+
+.period-header-btn {
+  display: inline-block;
+  margin-top: 4px;
+  font-size: 10px;
+  padding: 2px 5px;
+  background: #e2e8f0;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.period-header-btn:hover {
+  background: #cbd5e1;
+}
+
+.period-pill-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 8px;
+  margin: 12px 0;
+}
+
+.period-pill {
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  background: #f8fafc;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 13px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.15s ease;
+}
+
+.period-pill.present {
+  background: #d4edda;
+  color: #155724;
+  border-color: #c3e6cb;
+}
+
+.period-pill.absent {
+  background: #f8d7da;
+  color: #721c24;
+  border-color: #f5c6cb;
+}
+
+.status-badge {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 12px;
+  display: inline-block;
+}
+.status-badge.full { background: #e5f7eb; color: #218838; }
+.status-badge.partial { background: #fff3cd; color: #856404; }
+.status-badge.absent { background: #fff0f0; color: #d9534f; }
+
+
